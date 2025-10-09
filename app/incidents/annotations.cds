@@ -8,17 +8,17 @@ annotate service.Incidents with @(
         {
             $Type : 'UI.DataFieldForAction',
             Action : 'ProcessorService.pickIncident',
-            Label : 'pick Incident',
+            Label : 'Pick Incident',
         },
         {
             $Type : 'UI.DataFieldForAction',
             Action : 'ProcessorService.closeIncident',
-            Label : 'close',
+            Label : 'Close',
         },
         {
             $Type : 'UI.DataFieldForAction',
             Action : 'ProcessorService.startProcessing',
-            Label : 'process',
+            Label : 'Process',
         },
     ],
 );

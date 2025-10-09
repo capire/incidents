@@ -6,8 +6,6 @@ class ProcessorService extends cds.ApplicationService {
 
     const { Incidents } = this.entities
 
-
-
     //incidents.draft before create fill defaults
     // NOOOOOO!!!!! -> default
     this.before ('CREATE', Incidents.drafts, req => {
@@ -41,13 +39,33 @@ class ProcessorService extends cds.ApplicationService {
       if (urgent) req.data.urgency_code = 'H'
     })
 
-
-    //don't allow modifications of closed incidents
-    // NOOOOOO!!!!! -> @flows
-    this.before ('UPDATE', Incidents, async req => {
-      let closed = await SELECT.one(1) .from (req.subject) .where `status.code = 'C'`
-      if (closed) req.reject `Can't modify a closed incident!`
+    // pick incident -> from new to assigned
+     // NOOOOOO!!!!! -> @flows
+    this.on ('pickIncident', Incidents, async req => {
+      let { ID } = req.params[0]
+      //check if incident is in new status
+      await SELECT.one(Incidents).where({ ID, status_code: 'N' }) || req.reject(400, 'Incident is not in new status')
+      await UPDATE(Incidents).set({ status: { code: 'A' } }).where({ ID })
     })
+    
+    // start processing -> from assigned to in_process
+     // NOOOOOO!!!!! -> @flows
+    this.on ('startProcessing', Incidents, async req => {
+      let { ID } = req.params[0]
+      //check if incident is in assigned status
+      await SELECT.one(Incidents).where({ ID, status_code: 'A' }) || req.reject(400, 'Incident is not in assigned status')
+      await UPDATE(Incidents).set({ status: { code: 'I' } }).where({ ID })
+    })
+    
+    // close incident -> from resolved to closed
+     // NOOOOOO!!!!! -> @flows
+    this.on ('closeIncident', Incidents, async req => {
+      let { ID } = req.params[0]
+      //check if incident is in resolved status
+      await SELECT.one(Incidents).where({ ID: ID, status_code: 'R' }) || req.reject(400, 'Incident is not in resolved status')
+      await UPDATE(Incidents).set({ status: { code: 'C' } }).where({ ID })
+    })
+  
 
     //WHAAAT???? -> Where did all my code go???
 

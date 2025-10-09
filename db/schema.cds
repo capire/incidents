@@ -35,7 +35,7 @@ entity Incidents : cuid, managed {
   title          : String; //@mandatory @title: 'Title';
   //urgency        : Association to Urgency default 'M';
   //status         : Association to Status default 'N';
-  @flow.status
+  //@flow.status
   status         : Association to Status;
   urgency        : Association to Urgency;
   conversation   : Composition of many {
