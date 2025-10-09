@@ -34,6 +34,7 @@ entity Incidents : cuid, managed {
   @assert: (case
     when title is null  then 'is missing'
     when trim(title)='' then 'must not be empty'
+    when title like '%urgent%' and urgency!='H' then 'urgent incidents must be high priority'
   end)
   title          : String @title: 'Title';
   urgency        : Association to Urgency default 'M';
@@ -42,10 +43,6 @@ entity Incidents : cuid, managed {
     key ID    : UUID;
     timestamp : type of managed:createdAt;
     author    : type of managed:createdBy;
-    // @assert: (case
-    //   when message is null  then 'is missing'
-    //   when trim(message)='' then 'must not be empty'
-    // end)
     message   : String;
   };
 }
