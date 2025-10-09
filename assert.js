@@ -5,7 +5,8 @@ cds.on('served', async () => {
   const db = await cds.connect.to('db')
 
   db.after(['INSERT', 'UPSERT', 'UPDATE'], async (res, req) => {
-    // not for NEW drafts
+    // not for NEW drafts or draft admin data
+    if (req.target.name === 'DRAFT.DraftAdministrativeData') return
     if (req.event === 'CREATE' && req.target.name.endsWith('.drafts')) return
 
     const IS_DRAFT = req.target.name.endsWith('.drafts')
@@ -46,6 +47,7 @@ cds.on('served', async () => {
 
       const keys = {}
       for (const key in target.keys) {
+        if (key === 'IsActiveEntity') continue
         if (!(key in row)) return
         keys[key] = row[key]
       }
