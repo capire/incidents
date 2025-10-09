@@ -5,10 +5,16 @@ cds.on('served', async () => {
   const db = await cds.connect.to('db')
 
   db.after(['INSERT', 'UPSERT', 'UPDATE'], async (res, req) => {
-    // if (req.target.name.toLowerCase().includes('draft')) return
+    // not for NEW drafts
+    if (req.event === 'CREATE' && req.target.name.endsWith('.drafts')) return
+
+    const IS_DRAFT = req.target.name.endsWith('.drafts')
 
     const template = getTemplate('assert', db, req.target, {
       pick: element => {
+        // for drafts, we need to pick each element
+        if (IS_DRAFT) return element['@assert']
+
         if (!element['@assert']) return false
 
         // Ensure each parent of an element with @assert is picked only once
@@ -29,6 +35,12 @@ cds.on('served', async () => {
 
     template.process(req.data, elementInfo => {
       const { row, target } = elementInfo
+
+      // for drafts, only consider changed elements (= in req.data)
+      if (IS_DRAFT) {
+        const touched = Object.keys(req.data).filter(e => !Object.keys(target.keys).includes(e))
+        if (touched.every(e => !target.elements[e]['@assert'])) return
+      }
 
       cds.context.tx.changes[target.name] ??= []
 
