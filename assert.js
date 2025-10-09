@@ -75,33 +75,73 @@ cds.on('served', async () => {
           asserts.push({ xpr: assert.xpr, as: element.name })
         }
 
-        entity.assert = cds.ql.SELECT(asserts).from(entity)
+        entity.assert = cds.ql
+          .SELECT([...Object.keys(entity.keys).map(k => ({ ref: [k], as: `$$$_${k}` })), ...asserts])
+          .from(entity)
       }
 
-      const query = cds.ql.clone(entity.assert)
+      const queries = []
+      for (const k of keys) {
+        queries.push(cds.ql.clone(entity.assert).where(k))
+      }
 
-      // Select only rows with changes
-      const keyNames = Object.keys(entity.keys).filter(k => !entity.keys[k].virtual && !entity.keys[k].isAssociation)
-
-      query.where([
-        { list: keyNames.map(k => ({ ref: [k] })) },
-        'in',
-        { list: keys.map(keyKV => ({ list: keyNames.map(k => ({ val: keyKV[k] })) })) }
-      ])
-
-      let result
+      let results
       try {
-        result = await this.run(query)
+        results = await this.run(queries)
       } catch (e) {
         debugger
       }
 
-      for (const row of result) {
-        const failedColumns = Object.entries(row).filter(([k, v]) => v !== null)
+      for (const result of results) {
+        for (const row of result) {
+          const keyColumns = Object.entries(row)
+            .filter(([k, v]) => k.startsWith('$$$_'))
+            .reduce((acc, [k, v]) => ((acc[k.split('$$$_')[1]] = v), acc), {})
+          const failedColumns = Object.entries(row).filter(([k, v]) => !k.startsWith('$$$_') && v !== null)
 
-        for (const [element, message] of failedColumns) {
-          const target = 'in/' + element
-          req.error({ code: 400, message, target, '@Common.numericSeverity': 4 })
+          const is_draft = entityName.endsWith('.drafts')
+          let draft
+          let draftMessages = []
+          if (is_draft) {
+            try {
+              const select_draft = SELECT.one.from(entity, keyColumns).columns('DraftAdministrativeData_DraftUUID', {
+                ref: ['DraftAdministrativeData'],
+                expand: [{ ref: ['DraftMessages'] }]
+              })
+              draft = await this.run(select_draft)
+            } catch (e) {
+              debugger
+            }
+          }
+
+          for (const [element, message] of failedColumns) {
+            if (is_draft) {
+              // TODO: fix prefix
+              const prefix = `${entity.name.split('.')[1]}(ID=${keyColumns.ID},IsActiveEntity=false)`
+              draftMessages.push({
+                code: 'ASSERT',
+                message,
+                target: element,
+                numericSeverity: 4,
+                prefix
+              })
+            } else {
+              req.error({ code: 'ASSERT', message, target: 'in/' + element, '@Common.numericSeverity': 4 })
+            }
+          }
+
+          if (draftMessages.length) {
+            // TODO: merge with existing draft.DraftAdministrativeData.DraftMessages
+            try {
+              await this.run(
+                UPDATE('DRAFT.DraftAdministrativeData')
+                  .set({ DraftMessages: draftMessages })
+                  .where({ DraftUUID: draft.DraftAdministrativeData_DraftUUID })
+              )
+            } catch (error) {
+              debugger
+            }
+          }
         }
       }
     }
