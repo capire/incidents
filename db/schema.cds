@@ -31,6 +31,10 @@ entity Addresses : cuid, managed {
  */
 entity Incidents : cuid, managed {
   customer       : Association to Customers;
+  @assert: (case
+    when title is null  then 'is missing'
+    when trim(title)='' then 'must not be empty'
+  end)
   title          : String @title: 'Title';
   urgency        : Association to Urgency default 'M';
   status         : Association to Status default 'N';
@@ -38,6 +42,10 @@ entity Incidents : cuid, managed {
     key ID    : UUID;
     timestamp : type of managed:createdAt;
     author    : type of managed:createdBy;
+    // @assert: (case
+    //   when message is null  then 'is missing'
+    //   when trim(message)='' then 'must not be empty'
+    // end)
     message   : String;
   };
 }
