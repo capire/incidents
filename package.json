@@ -21,5 +21,11 @@
   "sapux": [
     "app/incidents"
   ],
+
+   "cds": {
+    "features": {
+      "compile_for_flows": true
+    }
+  },
   "private": true
 }

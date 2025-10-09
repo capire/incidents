@@ -2,7 +2,26 @@ using ProcessorService as service from '../../srv/processor-service';
 using from '../../db/schema';
 
 annotate service.Customers with @title : '{i18n>Customer}';
-annotate service.Incidents with @title : '{i18n>Incident}';
+annotate service.Incidents with @(
+    title : '{i18n>Incident}',
+    UI.Identification : [
+        {
+            $Type : 'UI.DataFieldForAction',
+            Action : 'ProcessorService.pickIncident',
+            Label : 'pick Incident',
+        },
+        {
+            $Type : 'UI.DataFieldForAction',
+            Action : 'ProcessorService.closeIncident',
+            Label : 'close',
+        },
+        {
+            $Type : 'UI.DataFieldForAction',
+            Action : 'ProcessorService.startProcessing',
+            Label : 'process',
+        },
+    ],
+);
 annotate service.Incidents with @odata.draft.enabled;
 
 annotate service.Incidents with @(
