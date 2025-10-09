@@ -1,0 +1,225 @@
+@server=http://localhost:4004
+@username=alice
+@password=
+
+
+### Incidents
+# @name Incidents_GET
+GET {{server}}/odata/v4/processor/Incidents
+Authorization: Basic {{username}}:{{password}}
+
+### Incidents get single incident with expanded customer
+# @name Incidents_GET_expand_customer
+GET {{server}}/odata/v4/processor/Incidents(ID=3583f982-d7df-4aad-ab26-301d4a157cd7,IsActiveEntity=true)?$expand=customer
+Authorization: Basic {{username}}:{{password}}
+
+### Incidents Drafts GET
+# @name Incidents_Drafts_GET
+GET {{server}}/odata/v4/processor/Incidents?$filter=(IsActiveEntity eq false)
+Authorization: Basic {{username}}:{{password}}
+
+
+### Incidents Draft POST
+# @name Incidents_Draft_POST
+POST {{server}}/odata/v4/processor/Incidents
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+{
+  "customer": {
+    "ID": "Customers-5477811"
+  },
+  "title": "title-21464476",
+  "status": {
+    "code": "A"
+  },
+  "urgency": {
+    "code": "L"
+  },
+  "conversation": [
+    {
+      "ID": "16946518-c66c-42ed-8250-3af318ff6a3d",
+      "timestamp": "2021-07-10T23:00:00.000Z",
+      "author": "author.a380m@example.net",
+      "message": "message-16946518"
+    },
+    {
+      "ID": "16946519-bba3-4007-a37a-364e89d7d1c7",
+      "timestamp": "2010-02-02T23:00:00.000Z",
+      "author": "author.a380n@example.org",
+      "message": "message-16946519"
+    }
+  ],
+  "createdAt": "2007-06-23T23:00:00.000Z",
+  "createdBy": "createdBy.cs23g@example.net",
+  "modifiedAt": "2023-08-14T23:00:00.000Z",
+  "modifiedBy": "modifiedBy.cs23g@example.com"
+}
+
+
+### Result from POST request above
+@draftID={{Incidents_Draft_POST.response.body.$.ID}}
+
+
+### Incidents Draft PATCH
+# @name Incidents_Draft_Patch
+PATCH {{server}}/odata/v4/processor/Incidents(ID={{draftID}},IsActiveEntity=false)
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+{
+  "customer": {
+    "ID": "Customers-5477811"
+  },
+  "title": "title-21464476",
+  "status": {
+    "code": "A"
+  },
+  "urgency": {
+    "code": "L"
+  },
+  "conversation": [
+    {
+      "ID": "16946518-c66c-42ed-8250-3af318ff6a3d",
+      "timestamp": "2021-07-10T23:00:00.000Z",
+      "author": "author.a380m@example.net",
+      "message": "message-16946518"
+    },
+    {
+      "ID": "16946519-bba3-4007-a37a-364e89d7d1c7",
+      "timestamp": "2010-02-02T23:00:00.000Z",
+      "author": "author.a380n@example.org",
+      "message": "message-16946519"
+    }
+  ],
+  "createdAt": "2007-06-23T23:00:00.000Z",
+  "createdBy": "createdBy.cs23g@example.net",
+  "modifiedAt": "2023-08-14T23:00:00.000Z",
+  "modifiedBy": "modifiedBy.cs23g@example.com"
+}
+
+
+### Incidents Draft Prepare
+# @name Incidents_Draft_Prepare
+POST {{server}}/odata/v4/processor/Incidents(ID={{draftID}},IsActiveEntity=false)/ProcessorService.draftPrepare
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+{}
+
+
+### Incidents Draft Activate
+# @name Incidents_Draft_Activate
+POST {{server}}/odata/v4/processor/Incidents(ID={{draftID}},IsActiveEntity=false)/ProcessorService.draftActivate
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+{}
+
+
+### Customers
+# @name Customers_GET
+GET {{server}}/odata/v4/processor/Customers
+Authorization: Basic {{username}}:{{password}}
+
+
+### Status
+# @name Status_GET
+GET {{server}}/odata/v4/processor/Status
+Authorization: Basic {{username}}:{{password}}
+
+
+### Urgency
+# @name Urgency_GET
+GET {{server}}/odata/v4/processor/Urgency
+Authorization: Basic {{username}}:{{password}}
+
+
+### Incidents.conversation
+# @name Incidentsconversation_GET
+GET {{server}}/odata/v4/processor/Incidents.conversation
+Authorization: Basic {{username}}:{{password}}
+
+
+### Incidents.conversation
+# @name Incidentsconversation_POST
+POST {{server}}/odata/v4/processor/Incidents.conversation
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+{
+  "ID": "16946518-c66c-42ed-8250-3af318ff6a3d",
+  "timestamp": "2021-07-10T23:00:00.000Z",
+  "author": "author.a380m@example.net",
+  "message": "message-16946518"
+}
+
+
+### Incidents.conversation
+# @name Incidentsconversation_PATCH
+PATCH {{server}}/odata/v4/processor/Incidents.conversation(up_=[object Object],ID=16946518-c66c-42ed-8250-3af318ff6a3d)
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+{
+  "ID": "16946518-c66c-42ed-8250-3af318ff6a3d",
+  "timestamp": "2021-07-10T23:00:00.000Z",
+  "author": "author.a380m@example.net",
+  "message": "message-16946518"
+}
+
+
+### Incidents.conversation
+# @name Incidentsconversation_DELETE
+DELETE {{server}}/odata/v4/processor/Incidents.conversation(up_=[object Object],ID=16946518-c66c-42ed-8250-3af318ff6a3d)
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+
+### Addresses
+# @name Addresses_GET
+GET {{server}}/odata/v4/processor/Addresses
+Authorization: Basic {{username}}:{{password}}
+
+
+### Addresses
+# @name Addresses_POST
+POST {{server}}/odata/v4/processor/Addresses
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+{
+  "ID": "89296427-4573-4fe6-808b-ce13c157f6f4",
+  "city": "city-8929642",
+  "postCode": "postCode-8929642",
+  "streetAddress": "streetAddress-8929642",
+  "createdAt": "2000-04-02T23:00:00.000Z",
+  "createdBy": "createdBy.5be5m@example.net",
+  "modifiedAt": "2015-07-25T23:00:00.000Z",
+  "modifiedBy": "modifiedBy.5be5m@example.net"
+}
+
+
+### Addresses
+# @name Addresses_PATCH
+PATCH {{server}}/odata/v4/processor/Addresses/89296427-4573-4fe6-808b-ce13c157f6f4
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+{
+  "ID": "89296427-4573-4fe6-808b-ce13c157f6f4",
+  "city": "city-8929642",
+  "postCode": "postCode-8929642",
+  "streetAddress": "streetAddress-8929642",
+  "createdAt": "2000-04-02T23:00:00.000Z",
+  "createdBy": "createdBy.5be5m@example.net",
+  "modifiedAt": "2015-07-25T23:00:00.000Z",
+  "modifiedBy": "modifiedBy.5be5m@example.net"
+}
+
+
+### Addresses
+# @name Addresses_DELETE
+DELETE {{server}}/odata/v4/processor/Addresses/89296427-4573-4fe6-808b-ce13c157f6f4
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}

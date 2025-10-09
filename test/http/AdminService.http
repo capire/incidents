@@ -1,0 +1,58 @@
+@server=http://localhost:4004
+@username=alice
+@password=
+
+
+### Customers
+# @name Customers_GET
+GET {{server}}/odata/v4/admin/Customers
+Authorization: Basic {{username}}:{{password}}
+
+
+### Addresses
+# @name Addresses_GET
+GET {{server}}/odata/v4/admin/Addresses
+Authorization: Basic {{username}}:{{password}}
+
+
+### Addresses
+# @name Addresses_POST
+POST {{server}}/odata/v4/admin/Addresses
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+{
+  "ID": "2966691b-0603-482f-9732-a6cac9d4c379",
+  "city": "city-2966691",
+  "postCode": "postCode-2966691",
+  "streetAddress": "streetAddress-2966691",
+  "createdAt": "2011-02-25T23:00:00.000Z",
+  "createdBy": "createdBy.1rl43@example.org",
+  "modifiedAt": "2011-05-31T23:00:00.000Z",
+  "modifiedBy": "modifiedBy.1rl43@example.net"
+}
+
+
+### Addresses
+# @name Addresses_PATCH
+PATCH {{server}}/odata/v4/admin/Addresses/2966691b-0603-482f-9732-a6cac9d4c379
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+{
+  "ID": "2966691b-0603-482f-9732-a6cac9d4c379",
+  "city": "city-2966691",
+  "postCode": "postCode-2966691",
+  "streetAddress": "streetAddress-2966691",
+  "createdAt": "2011-02-25T23:00:00.000Z",
+  "createdBy": "createdBy.1rl43@example.org",
+  "modifiedAt": "2011-05-31T23:00:00.000Z",
+  "modifiedBy": "modifiedBy.1rl43@example.net"
+}
+
+
+### Addresses
+# @name Addresses_DELETE
+DELETE {{server}}/odata/v4/admin/Addresses/2966691b-0603-482f-9732-a6cac9d4c379
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}

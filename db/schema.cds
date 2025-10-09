@@ -10,7 +10,8 @@ entity Customers : managed {
   key ID         : String;
   firstName      : String;
   lastName       : String;
-  name           : String = trim(firstName ||' '|| lastName);
+  name       : String @readonly : true;
+  //name           : String = trim(firstName ||' '|| lastName);
   email          : EMailAddress;
   phone          : PhoneNumber;
   creditCardNo   : String(16) @assert.format: '^[1-9]\d{15}$';
@@ -31,9 +32,11 @@ entity Addresses : cuid, managed {
  */
 entity Incidents : cuid, managed {
   customer       : Association to Customers;
-  title          : String @title: 'Title';
-  urgency        : Association to Urgency default 'M';
-  status         : Association to Status default 'N';
+  title          : String; //@mandatory @title: 'Title';
+  //urgency        : Association to Urgency default 'M';
+  //status         : Association to Status default 'N';
+  status         : Association to Status;
+  urgency        : Association to Urgency;
   conversation   : Composition of many {
     key ID    : UUID;
     timestamp : type of managed:createdAt;
