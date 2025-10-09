@@ -45,6 +45,14 @@ entity Incidents : cuid, managed {
   };
 }
 
+// annotate Incidents with {
+//   title @assert: ( case
+//     when title is null  then 'is missing'
+//     when trim(title)='' then 'must not be empty'
+//     when title like '%urgent%' and urgency!='H' then 'urgent incidents must be high priority'
+//   end )
+// }
+
 entity Status : CodeList {
   key code    : String enum {
     new        = 'N';
