@@ -37,12 +37,6 @@ cds.on('served', async () => {
     template.process(req.data, elementInfo => {
       const { row, target } = elementInfo
 
-      // for drafts, only consider changed elements (= in req.data)
-      if (IS_DRAFT) {
-        const touched = Object.keys(req.data).filter(e => !Object.keys(target.keys).includes(e))
-        if (touched.every(e => !target.elements[e]['@assert'])) return
-      }
-
       cds.context.tx.changes[target.name] ??= []
 
       const keys = {}
@@ -102,8 +96,7 @@ cds.on('served', async () => {
           const failedColumns = Object.entries(row).filter(([k, v]) => !k.startsWith('$$$_') && v !== null)
 
           const is_draft = entityName.endsWith('.drafts')
-          let draft
-          let draftMessages = []
+          let draft, draftMessages
           if (is_draft) {
             try {
               const select_draft = SELECT.one.from(entity, keyColumns).columns('DraftAdministrativeData_DraftUUID', {
@@ -111,6 +104,7 @@ cds.on('served', async () => {
                 expand: [{ ref: ['DraftMessages'] }]
               })
               draft = await this.run(select_draft)
+              draftMessages = draft.DraftAdministrativeData.DraftMessages.filter(m => m.code !== 'ASSERT')
             } catch (e) {
               debugger
             }
@@ -118,7 +112,6 @@ cds.on('served', async () => {
 
           for (const [element, message] of failedColumns) {
             if (is_draft) {
-              // TODO: fix prefix
               const prefix = `${entity.name.split('.')[1]}(ID=${keyColumns.ID},IsActiveEntity=false)`
               draftMessages.push({
                 code: 'ASSERT',
@@ -132,8 +125,7 @@ cds.on('served', async () => {
             }
           }
 
-          if (draftMessages.length) {
-            // TODO: merge with existing draft.DraftAdministrativeData.DraftMessages
+          if (is_draft) {
             try {
               await this.run(
                 UPDATE('DRAFT.DraftAdministrativeData')
